@@ -3,6 +3,114 @@ import Icon from '@/components/ui/icon';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 
+const API_URL = 'https://functions.poehali.dev/eb3bb1bb-1bfa-48b7-ac2d-666c3bdca970';
+
+function OrderModal({ open, onClose, defaultService }: { open: boolean; onClose: () => void; defaultService: string }) {
+  const [form, setForm] = useState({ name: '', phone: '', service: defaultService, breakdown: '', comment: '' });
+  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+
+  if (!open) return null;
+
+  const set = (k: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
+    setForm((f) => ({ ...f, [k]: e.target.value }));
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setStatus('loading');
+    try {
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...form, service: form.service || defaultService }),
+      });
+      if (res.ok) { setStatus('success'); }
+      else { setStatus('error'); }
+    } catch { setStatus('error'); }
+  };
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in" onClick={onClose}>
+      <Card className="w-full max-w-lg bg-card border-border p-6 md:p-8 relative" onClick={(e) => e.stopPropagation()}>
+        <button onClick={onClose} className="absolute top-4 right-4 text-muted-foreground hover:text-foreground transition-colors">
+          <Icon name="X" size={20} />
+        </button>
+
+        {status === 'success' ? (
+          <div className="text-center py-8">
+            <div className="w-16 h-16 rounded-full bg-accent/20 grid place-items-center mx-auto mb-4">
+              <Icon name="CheckCircle" size={36} className="text-accent" />
+            </div>
+            <h3 className="font-display text-2xl font-bold mb-2">Заявка принята!</h3>
+            <p className="text-muted-foreground mb-6">Мастер перезвонит вам в течение 10 минут</p>
+            <Button onClick={onClose} className="w-full">Закрыть</Button>
+          </div>
+        ) : (
+          <>
+            <div className="mb-6">
+              <h3 className="font-display text-2xl font-bold">Вызвать мастера</h3>
+              <p className="text-muted-foreground text-sm mt-1">Перезвоним через 10 минут, приедем в удобное время</p>
+            </div>
+            <form onSubmit={submit} className="flex flex-col gap-4">
+              <div className="grid sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Ваше имя *</label>
+                  <input
+                    required value={form.name} onChange={set('name')}
+                    placeholder="Иван Иванов"
+                    className="w-full rounded-xl border border-border bg-secondary px-4 py-2.5 text-sm outline-none focus:border-primary transition-colors"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Телефон *</label>
+                  <input
+                    required value={form.phone} onChange={set('phone')}
+                    placeholder="+7 (999) 000-00-00"
+                    className="w-full rounded-xl border border-border bg-secondary px-4 py-2.5 text-sm outline-none focus:border-primary transition-colors"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Тип техники *</label>
+                <select
+                  required value={form.service} onChange={set('service')}
+                  className="w-full rounded-xl border border-border bg-secondary px-4 py-2.5 text-sm outline-none focus:border-primary transition-colors"
+                >
+                  <option value="">Выберите технику</option>
+                  {['Холодильники','Стиральные машины','Электроплиты','Варочные панели','Водонагреватели','Посудомоечные машины','Сушильные машины','Духовые шкафы','Морозильные камеры','Кондиционеры','Кофемашины'].map((s) => (
+                    <option key={s} value={s}>{s}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Опишите поломку</label>
+                <textarea
+                  value={form.comment} onChange={set('comment')}
+                  placeholder="Кратко опишите проблему..."
+                  rows={3}
+                  className="w-full rounded-xl border border-border bg-secondary px-4 py-2.5 text-sm outline-none focus:border-primary transition-colors resize-none"
+                />
+              </div>
+              {status === 'error' && (
+                <p className="text-sm text-destructive flex items-center gap-2">
+                  <Icon name="AlertCircle" size={16} /> Ошибка отправки. Попробуйте ещё раз.
+                </p>
+              )}
+              <Button type="submit" disabled={status === 'loading'} className="h-12 text-base">
+                {status === 'loading' ? (
+                  <><Icon name="Loader2" size={18} className="mr-2 animate-spin" /> Отправляем...</>
+                ) : (
+                  <><Icon name="Phone" size={18} className="mr-2" /> Вызвать мастера</>
+                )}
+              </Button>
+              <p className="text-xs text-muted-foreground text-center">Нажимая кнопку, вы соглашаетесь с обработкой персональных данных</p>
+            </form>
+          </>
+        )}
+      </Card>
+    </div>
+  );
+}
+
 const HERO_IMG = 'https://cdn.poehali.dev/projects/6f6f0ed1-9cda-4625-a43d-52bb943acf59/files/8f9cef79-6f2c-4eb3-91f6-e6f14d615eed.jpg';
 const TOOLS_IMG = 'https://cdn.poehali.dev/projects/6f6f0ed1-9cda-4625-a43d-52bb943acf59/files/ab3e9277-bc43-4cf3-8e39-8bc85cc67b47.jpg';
 
@@ -66,11 +174,16 @@ const Index = () => {
   const [service, setService] = useState(SERVICES[0]);
   const [breakdown, setBreakdown] = useState(BREAKDOWNS[0]);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalService, setModalService] = useState('');
 
   const estimate = Math.round(service.base * breakdown.mult);
 
+  const openModal = (svc = '') => { setModalService(svc); setModalOpen(true); };
+
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
+      <OrderModal open={modalOpen} onClose={() => setModalOpen(false)} defaultService={modalService} />
       {/* HEADER */}
       <header className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-background/70 border-b border-border">
         <div className="container flex items-center justify-between h-16">
@@ -91,7 +204,7 @@ const Index = () => {
             <a href="tel:+74950000000" className="hidden sm:flex items-center gap-2 text-sm font-semibold">
               <Icon name="Phone" size={16} className="text-accent" /> +7 (495) 000-00-00
             </a>
-            <Button onClick={() => scrollTo('calc')} className="hidden sm:inline-flex">Вызвать мастера</Button>
+            <Button onClick={() => openModal()} className="hidden sm:inline-flex">Вызвать мастера</Button>
             <button className="md:hidden" onClick={() => setMenuOpen((v) => !v)}>
               <Icon name={menuOpen ? 'X' : 'Menu'} size={24} />
             </button>
@@ -226,7 +339,7 @@ const Index = () => {
                   <div className="rounded-2xl bg-secondary p-6 text-center">
                     <div className="text-sm text-muted-foreground mb-1">Примерная стоимость</div>
                     <div className="font-display text-5xl font-bold text-gradient">{estimate.toLocaleString('ru-RU')} ₽</div>
-                    <Button className="w-full mt-5 h-11" onClick={() => scrollTo('about')}>
+                    <Button className="w-full mt-5 h-11" onClick={() => openModal(service.title)}>
                       <Icon name="Phone" size={16} className="mr-2" /> Вызвать мастера
                     </Button>
                   </div>
@@ -332,8 +445,8 @@ const Index = () => {
               <h2 className="font-display text-3xl md:text-5xl font-bold mb-4">Техника сломалась? Починим сегодня!</h2>
               <p className="text-muted-foreground max-w-lg mx-auto mb-8">Оставьте заявку — мастер перезвонит в течение 10 минут и приедет в удобное время.</p>
               <div className="flex flex-wrap justify-center gap-4">
-                <Button size="lg" className="h-12 px-8" onClick={() => scrollTo('calc')}>
-                  <Icon name="Calculator" size={18} className="mr-2" /> Рассчитать стоимость
+                <Button size="lg" className="h-12 px-8" onClick={() => openModal()}>
+                  <Icon name="Phone" size={18} className="mr-2" /> Вызвать мастера
                 </Button>
                 <a href="tel:+74950000000">
                   <Button size="lg" variant="outline" className="h-12 px-8">

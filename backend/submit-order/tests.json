@@ -1,0 +1,34 @@
+{
+  "tests": [
+    {
+      "name": "OPTIONS preflight",
+      "method": "OPTIONS",
+      "path": "/",
+      "expectedStatus": 200
+    },
+    {
+      "name": "Submit valid order",
+      "method": "POST",
+      "path": "/",
+      "body": {
+        "name": "Тест Клиент",
+        "phone": "+79990000000",
+        "service": "Холодильники",
+        "breakdown": "Диагностика и мелкий ремонт",
+        "comment": "Не морозит"
+      },
+      "expectedStatus": 200,
+      "expectedBody": "success",
+      "bodyMatcher": "contains"
+    },
+    {
+      "name": "Missing required fields",
+      "method": "POST",
+      "path": "/",
+      "body": { "name": "Тест" },
+      "expectedStatus": 400,
+      "expectedBody": "error",
+      "bodyMatcher": "contains"
+    }
+  ]
+}
