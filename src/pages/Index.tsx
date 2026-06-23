@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import Icon from '@/components/ui/icon';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -69,6 +70,39 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
+      <Helmet>
+        <title>РемТехСервис — ремонт бытовой техники на дому с гарантией</title>
+        <meta name="description" content="Ремонт холодильников, стиральных машин, плит, кондиционеров и другой бытовой техники на дому в Москве. Выезд за 60 минут, гарантия до 2 лет, без предоплаты." />
+        <link rel="canonical" href="https://remtehservice.ru/" />
+        <meta property="og:title" content="РемТехСервис — ремонт бытовой техники с гарантией" />
+        <meta property="og:description" content="Ремонт 11 видов бытовой техники на дому. Выезд за 60 минут, гарантия до 2 лет." />
+        <meta property="og:url" content="https://remtehservice.ru/" />
+        <meta property="og:type" content="website" />
+        <meta name="robots" content="index, follow" />
+        <script type="application/ld+json">{JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "LocalBusiness",
+          "name": "РемТехСервис",
+          "description": "Ремонт бытовой техники на дому в Москве. Холодильники, стиральные машины, плиты, кондиционеры и другая техника.",
+          "telephone": "+74950000000",
+          "email": "info@remtehservice.ru",
+          "areaServed": "Москва",
+          "openingHours": "Mo-Su 00:00-24:00",
+          "priceRange": "от 700 ₽",
+          "hasOfferCatalog": {
+            "@type": "OfferCatalog",
+            "name": "Ремонт бытовой техники",
+            "itemListElement": SERVICES.map((s) => ({
+              "@type": "Offer",
+              "itemOffered": {
+                "@type": "Service",
+                "name": `Ремонт ${s.title.toLowerCase()}`,
+                "url": `https://remtehservice.ru/uslugi/${s.slug}`
+              }
+            }))
+          }
+        })}</script>
+      </Helmet>
       <OrderModal open={modalOpen} onClose={() => setModalOpen(false)} defaultService={modalService} />
       {/* HEADER */}
       <header className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-background/70 border-b border-border">

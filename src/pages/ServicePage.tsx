@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import Icon from '@/components/ui/icon';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -23,8 +24,42 @@ export default function ServicePage({ service }: Props) {
   const [breakdown, setBreakdown] = useState(BREAKDOWNS[0]);
   const estimate = Math.round(service.base * breakdown.mult);
 
+  const metaTitle = `Ремонт ${service.title.toLowerCase()} на дому — РемТехСервис`;
+  const metaDesc = `${service.description} Выезд за 60 минут, гарантия до 2 лет. ${service.price}.`;
+  const metaUrl = `https://remtehservice.ru/uslugi/${service.slug}`;
+
   return (
     <div className="min-h-screen bg-background text-foreground">
+      <Helmet>
+        <title>{metaTitle}</title>
+        <meta name="description" content={metaDesc} />
+        <link rel="canonical" href={metaUrl} />
+        <meta property="og:title" content={metaTitle} />
+        <meta property="og:description" content={metaDesc} />
+        <meta property="og:url" content={metaUrl} />
+        <meta property="og:type" content="website" />
+        <meta name="robots" content="index, follow" />
+        <script type="application/ld+json">{JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Service",
+          "name": `Ремонт ${service.title.toLowerCase()}`,
+          "description": metaDesc,
+          "provider": {
+            "@type": "LocalBusiness",
+            "name": "РемТехСервис",
+            "telephone": "+74950000000",
+            "areaServed": "Москва"
+          },
+          "offers": {
+            "@type": "Offer",
+            "priceSpecification": {
+              "@type": "PriceSpecification",
+              "priceCurrency": "RUB",
+              "price": service.base
+            }
+          }
+        })}</script>
+      </Helmet>
       <OrderModal open={modalOpen} onClose={() => setModalOpen(false)} defaultService={service.title} />
 
       {/* HEADER */}
